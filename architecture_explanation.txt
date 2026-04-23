@@ -1,0 +1,60 @@
+Lead Agent Architecture
+=======================
+
+Overview
+--------
+This project is organized as a small Python package under `lead_agent/`. It separates the conversational agent into clean layers:
+- `prompt.py`: the system prompt that defines the agent persona, intent labels, and lead capture flow.
+- `llm.py`: LLM initialization and configuration handling.
+- `rag.py`: document indexing, retrieval, and context formatting.
+- `nodes.py`: agent behavior nodes for intent detection, casual chat, RAG responses, lead collection, and tool execution.
+- `graph.py`: builds the LangGraph state graph that routes each turn through the correct node.
+- `logger.py`: centralized logging to console and `logs/lead_agent.log`.
+- `state.py`: typed state definitions used by LangGraph.
+- `utils.py`: checkpoint persistence helpers for SQLite.
+
+Why LangGraph?
+---------------
+LangGraph was chosen because it naturally models a conversational workflow as a graph of states and decision points. It provides:
+- explicit node routing for different intents
+- a clear separation between intent classification, RAG lookup, chat handling, and lead capture
+- built-in support for stateful graphs and checkpoints
+- a maintainable way to extend the flow with new nodes or branches
+
+In this project, LangGraph makes the lead collection flow readable and extensible. The graph captures transitions like:
+- classify intent -> rag_node, lead_node, or chat_node
+- lead_node -> tool_router -> tool_call or end
+- rag_node -> end
+- chat_node -> end
+
+State Management
+----------------
+State is centrally managed through `AgentState`, which is a typed dictionary containing:
+- `lead`: the current lead data object (`name`, `email`, `platform`)
+- `intent`: the current intent label (`greeting`, `inquiry`, `high_intent`)
+- `rag_context`: retrieved document context used for answering product questions
+- `messages`: conversation history for the current turn
+
+Each node receives `AgentState` and returns an updated version of it. For example:
+- `classify_intent` updates `intent` based on recent user messages
+- `lead_node` updates `lead` after extracting new lead fields
+- `rag_node` updates `rag_context` with retrieved knowledge base text
+- `tool_call` writes tool results back into the state
+
+The `StateGraph` interface keeps state moving through the flow, and a SQLite-based checkpoint persists state between invocations. This makes the system more robust to restarts and allows a conversation state to resume if the bot is invoked again with the same session key.
+
+Logging and Error Handling
+--------------------------
+Custom logging is implemented in `lead_agent/logger.py`. It ensures:
+- logs are written to both console and `logs/lead_agent.log`
+- the `logs/` folder is created automatically
+- important workflow events and failures are captured centrally
+
+Error handling is localized to the package:
+- RAG indexing and retrieval log exceptions and raise custom errors
+- lead extraction failures preserve the previous lead state and are logged
+- intent classification failures default to a safe `greeting` intent
+
+Why this structure?
+-------------------
+This design keeps the core agent behavior the same while making the project easier to maintain, test, and extend. New features can be added by introducing new nodes or updating the prompt without rewriting the entire flow.

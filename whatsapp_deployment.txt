@@ -1,0 +1,68 @@
+WhatsApp Deployment Guidance
+============================
+
+Integration Approach
+-------------------
+To connect this conversational agent to WhatsApp, use a WhatsApp Business API provider or a webhook-capable gateway such as Twilio, Meta WhatsApp Business API, or another messaging platform.
+
+Key steps:
+1. Provision a WhatsApp Business number and configure a webhook endpoint.
+2. Deploy a small web service (FastAPI, Flask, or similar) to receive incoming WhatsApp messages.
+3. Map each incoming WhatsApp sender to a conversation session ID.
+4. Forward the message text to the agent, then reply through the WhatsApp API.
+
+Message flow
+------------
+- WhatsApp user sends a message.
+- Provider forwards the message to your webhook.
+- Webhook handler extracts the sender ID and message content.
+- Use sender ID as the session key to preserve state per user.
+- Invoke the agent with the current message and the session-specific `thread_id`.
+- Send back the agent's response text to WhatsApp.
+
+Session and state management
+----------------------------
+Because the project is stateful, preserve a mapping between WhatsApp sender IDs and agent sessions. For example:
+- `session_id = whatsapp_phone_number`
+- `thread_id = session_id` when invoking the agent
+
+If using LangGraph checkpointing, the same session key allows the graph to continue from previous state. This keeps:
+- lead collection progress
+- intent history
+- RAG context per user
+
+Recommended webhook design
+--------------------------
+Use a lightweight HTTP server with a route like `/webhook/whatsapp`.
+
+The handler should:
+- validate the request signature (provider-specific)
+- parse the incoming payload for sender ID and message text
+- build or retrieve the session-specific conversation state
+- call the agent
+- format the response payload for WhatsApp
+- send the response through the provider's message API
+
+Example integration options
+---------------------------
+- Twilio WhatsApp: use Twilio webhooks for inbound messages and Twilio API to reply.
+- Meta WhatsApp Business API: use the registered webhook URL and the messages endpoint.
+- Other gateway providers: adapt payload parsing and reply logic to their API.
+
+What to keep in mind
+--------------------
+- Use the same user identifier consistently so state remains tied to the correct chat.
+- Keep replies concise and WhatsApp-friendly.
+- If the agent calls a tool, return the final user-facing message after tool execution.
+- Handle non-text content by returning a fallback message or ignoring unsupported attachments.
+
+Why this works
+--------------
+This agent is already designed as a stateful conversational graph. WhatsApp integration is a thin transport layer on top:
+- the agent remains responsible for intent routing and lead-data extraction
+- WhatsApp supply simply becomes the channel for input/output
+- session keys preserve the agents internal state across multiple messages
+
+Deployment note
+---------------
+Host the webhook server on a public endpoint and configure the provider to call it. Then the agent can be invoked from any WhatsApp message using the same logic and state management as the current application.
