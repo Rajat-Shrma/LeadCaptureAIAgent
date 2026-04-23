@@ -1,4 +1,8 @@
+
+
 # Lead Collecting Agent
+
+![Agent Architecture](agent_orchestration.png)
 
 This project is now organized as a small Python package under `lead_agent`.
 
