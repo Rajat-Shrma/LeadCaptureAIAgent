@@ -1,0 +1,15 @@
+langgraph
+langchain
+langchain-google-genai
+langchain-huggingface 
+langchain_groq
+langgraph-checkpoint-sqlite
+langchain-community
+langchain_chroma
+dotenv
+streamlit
+chromadb
+sentence-transformers
+unstructured
+markdown
+torchvision
