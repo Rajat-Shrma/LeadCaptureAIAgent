@@ -15,7 +15,6 @@ This project is now organized as a small Python package under `lead_agent`.
   - `prompt.py`: the assistant system prompt
 
 - `streamlit_app.py`: Streamlit UI entrypoint using the package
-- `run_agent.py`: command-line runtime for testing the agent
 - `requirements.txt`: dependency list
 
 ## Usage
@@ -28,10 +27,6 @@ This project is now organized as a small Python package under `lead_agent`.
 3. Run the Streamlit UI:
    ```bash
    streamlit run streamlit_app.py
-   ```
-4. Or run the CLI agent:
-   ```bash
-   python run_agent.py
    ```
 
 ## Improvements
