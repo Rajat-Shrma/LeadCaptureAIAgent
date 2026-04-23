@@ -44,13 +44,17 @@ This project is now organized as a small Python package under `lead_agent`.
 - `requirements.txt`: dependency list
 
 ## Usage
-
-1. Create a `.env` with `GOOGLE_API_KEY` set.
-2. Install dependencies:
+1. Clone
+```bash
+git clone https://github.com/your-username/LeadCaptureAIAgent.git
+cd LeadCaptureAIAgent
+```
+2. Create a `.env` with `GOOGLE_API_KEY` set.
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Run the Streamlit UI:
+4. Run the Streamlit UI:
    ```bash
    streamlit run streamlit_app.py
    ```
