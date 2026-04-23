@@ -4,6 +4,27 @@
 
 ![Agent Architecture](agent_orchestration.png)
 
+#### classify_intent 
+This node classify the current intent of the user by analysing his/her last 6 messages.
+It classifies in only three intent:
+1. greetings
+2. inquiry
+3. high_intent
+
+#### rag_node
+This node handles the conversation when any specific info is demanded by the user such as plan and policies info. 
+It retrieves the semantic similar infor from the knowledge base and frames its response.
+
+#### chat_node
+This node handles the conversation when casual greetings and chatting is going on.
+
+#### lead_node
+This node handles the collection of information from the user such as name, email, platform.
+It routes to the tool_call only if all the informations are collected.
+
+#### tool_call 
+This node calls the mock_capture_lead tool.
+
 This project is now organized as a small Python package under `lead_agent`.
 
 ## Structure
